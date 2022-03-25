@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Krushn's Notepad</title>
+
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #333;
+        background-color: #fff;
+        margin: 0;
+      }
+
+      #header {
+        background-color: #f5f5f5;
+        border-bottom: 1px solid #e5e5e5;
+        padding-bottom: 10px;
+        padding-top: 10px;
+        padding-left: 24px;
+        padding-right: 24px;
+        display: flex;
+        flex-direction: row;
+      }
+
+      #header h1 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.33333333;
+
+        display: inline-block;
+        flex-grow: 1;
+      }
+
+      #header #status {
+        text-align: right;
+        margin-top: 0px;
+        margin-right: 10px;
+        display: inline-block;
+      }
+
+      #notebody {
+        box-sizing: border-box;
+        width: 100vw;
+        height: calc(100vh - 45px);
+        overflow-x: wrap;
+        overflow-y: scroll;
+        padding: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app">
+      <div id="header">
+        <h1>Krushn's Notepad</h1>
+
+        <span id="status">
+          <span v-if="savingNote">saving...</span>
+
+          {{characterCount}}
+        </span>
+      </div>
+      <div
+        id="notebody"
+        contenteditable
+        v-html="note"
+        @input.sync="saveNote"
+      ></div>
+    </main>
+
+    <!-- vue -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- localforage -->
+    <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+
+    <script>
+      function debounce(fn, delay) {
+        var timeoutID = null
+        return function () {
+          clearTimeout(timeoutID)
+          var args = arguments
+          var that = this
+          timeoutID = setTimeout(function () {
+            fn.apply(that, args)
+          }, delay)
+        }
+      }
+
+      var app = new Vue({
+        el: '#app',
+        data: {
+          note: '',
+          savedNote: '',
+          savingNote: false,
+        },
+        mounted: async function () {
+          this.savedNote = await localforage.getItem('note')
+          this.note = this.savedNote
+        },
+        methods: {
+          saveNote: debounce(async function (e) {
+            this.savingNote = true
+            await localforage.setItem('note', e.target.innerHTML)
+            this.savedNote = e.target.innerHTML
+            this.savingNote = false
+          }, 500),
+        },
+        computed: {
+          characterCount: function () {
+            return this.savedNote.length
+          },
+        },
+      })
+    </script>
+  </body>
+</html>
