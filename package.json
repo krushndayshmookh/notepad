@@ -11,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@vercel/postgres": "^0.4.1"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
