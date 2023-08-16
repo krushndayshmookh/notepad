@@ -10,7 +10,8 @@
   "author": "Krushn Dayshmookh <krushndayshmookh@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "@vercel/postgres": "^0.4.1"
+    "@vercel/postgres": "^0.4.1",
+    "pg": "^8.11.2"
   },
   "engines": {
     "node": "18.x"
