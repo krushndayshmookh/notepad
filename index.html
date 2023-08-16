@@ -15,14 +15,13 @@
     <link
       rel="shortcut icon"
       href="icons/mipmap-xxxhdpi/notepad.png"
-      type="image/png"
-    />
+      type="image/png" />
 
     <link rel="apple-touch-icon" href="icons/mipmap-xxxhdpi/notepad.png" />
 
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300&display=swap');
-      
+
       body {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         font-size: 14px;
@@ -86,8 +85,7 @@
         id="notebody"
         contenteditable
         v-html="note"
-        @input.sync="saveNote"
-      ></div>
+        @input.sync="saveNote"></div>
     </main>
 
     <!-- vue -->
@@ -118,11 +116,30 @@
         mounted: async function () {
           this.savedNote = await localforage.getItem('note')
           this.note = this.savedNote
+
+          fetch('/api/note')
+            .then((response) => response.json())
+            .then((data) => {
+              const serverNote = data.body
+
+              if (serverNote !== this.savedNote) {
+                this.note = serverNote
+                this.savedNote = serverNote
+                localforage.setItem('note', serverNote)
+              }
+            })
         },
         methods: {
           saveNote: debounce(async function (e) {
             this.savingNote = true
             await localforage.setItem('note', e.target.innerHTML)
+            fetch('/api/note', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ body: e.target.innerHTML }),
+            })
             this.savedNote = e.target.innerHTML
             this.savingNote = false
           }, 500),
